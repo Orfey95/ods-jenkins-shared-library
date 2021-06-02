@@ -1701,22 +1701,18 @@ class LeVADocumentUseCase extends DocGenUseCase {
     }
 
     private Map referencedDocumentVersions = null
-    private final ReentrantLock referencedDocumentVersionsMonitor = new ReentrantLock()
 
     /**
      * gets teh document version IDS at the start ... can't do that...
      * @return
      */
     protected Map getReferencedDocumentsVersion() {
-        return doGetReferencedDocumentsVersion()
-        /*synchronized (referencedDocumentVersionsMonitor) {
-            def versions = referencedDocumentVersions?.get()
-            if(versions == null) {
-                versions = doGetReferencedDocumentsVersion()
-                referencedDocumentVersions = new SoftReference<>(versions)
-            }
-            return versions
-        }*/
+        def versions = referencedDocumentVersions
+        if(versions == null) {
+            versions = doGetReferencedDocumentsVersion()
+            referencedDocumentVersions = versions
+        }
+        return versions
     }
 
     private Map doGetReferencedDocumentsVersion() {
