@@ -1697,11 +1697,17 @@ class LeVADocumentUseCase extends DocGenUseCase {
         return versionId
     }
 
+    private Map referencedDocumentVersions = null
+
     /**
      * gets teh document version IDS at the start ... can't do that...
      * @return
      */
-    protected Map getReferencedDocumentsVersion() {
+    protected synchronized Map getReferencedDocumentsVersion() {
+        return referencedDocumentVersions?:doGetReferencedDocumentsVersion()
+    }
+
+    private Map doGetReferencedDocumentsVersion() {
         if (!this.jiraUseCase) return [:]
         if (!this.jiraUseCase.jira) return [:]
 
