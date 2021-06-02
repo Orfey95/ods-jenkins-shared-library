@@ -1690,16 +1690,16 @@ class LeVADocumentUseCase extends DocGenUseCase {
      */
     protected Long getLatestDocVersionId(String document, List<String> environments = null) {
         def logger = ServiceRegistry.instance.get(Logger)
+        def versionId
         if (this.project.historyForDocumentExists(document)) {
-            def res = this.project.getHistoryForDocument(document).getVersion()
-            logger.info("From history: ${res}, class: ${res.class.getSimpleName()}")
-            return res
+            versionId = this.project.getHistoryForDocument(document).getVersion()
+            logger.info("From history: ${versionId}, class: ${versionId.class.getSimpleName()}")
         } else {
             def trackingIssues =  this.getDocumentTrackingIssuesForHistory(document, environments)
-            def res = this.jiraUseCase.getLatestDocVersionId(trackingIssues)
-            logger.info("From Jira: ${res}, class: ${res.class.getSimpleName()}")
-            return res
+            versionId = this.jiraUseCase.getLatestDocVersionId(trackingIssues)
+            logger.info("From Jira: ${versionId}, class: ${versionId.class.getSimpleName()}")
         }
+        return versionId
     }
 
     /**
