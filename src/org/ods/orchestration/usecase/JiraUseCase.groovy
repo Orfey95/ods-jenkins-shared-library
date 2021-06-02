@@ -383,7 +383,6 @@ class JiraUseCase {
                              "version. It contains value '${version}'.")
                      }
                  }
-                 this.logger.info("Class: ${versionNumber.class.getSimpleName()}, value: ${versionNumber}")
                  return versionNumber
              })
         }
@@ -392,7 +391,6 @@ class JiraUseCase {
         logger.debug("Retrieved max doc version ${versionList.max()} from doc tracking issues " +
             "${trackingIssues.collect { it.key } }")
 
-        this.logger.info("Class: ${result.class.getSimpleName()}, value: ${result}")
         return result
     }
 

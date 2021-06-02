@@ -1601,8 +1601,6 @@ class LeVADocumentUseCase extends DocGenUseCase {
             def docChapterKeys = docChapters.collect { chapter ->
                 chapter.key
             }
-            def logger = ServiceRegistry.instance.get(Logger)
-            logger.info("latestValidVersionId: ${latestValidVersionId}, class: ${latestValidVersionId.class.getSimpleName()}")
             docHistory.load(jiraData, latestValidVersionId, (keysInDoc + docChapterKeys).unique())
 
             // Save the doc history to project class, so it can be persisted when considered
@@ -1689,15 +1687,12 @@ class LeVADocumentUseCase extends DocGenUseCase {
      * @return string with the valid id
      */
     protected Long getLatestDocVersionId(String document, List<String> environments = null) {
-        def logger = ServiceRegistry.instance.get(Logger)
         def versionId
         if (this.project.historyForDocumentExists(document)) {
             versionId = this.project.getHistoryForDocument(document).getVersion()
-            logger.info("From history: ${versionId}, class: ${versionId.class.getSimpleName()}")
         } else {
             def trackingIssues =  this.getDocumentTrackingIssuesForHistory(document, environments)
             versionId = this.jiraUseCase.getLatestDocVersionId(trackingIssues)
-            logger.info("From Jira: ${versionId}, class: ${versionId.class.getSimpleName()}")
         }
         return versionId
     }
