@@ -1706,14 +1706,15 @@ class LeVADocumentUseCase extends DocGenUseCase {
      * @return
      */
     protected Map getReferencedDocumentsVersion() {
-        synchronized (referencedDocumentVersionsMonitor) {
+        return doGetReferencedDocumentsVersion()
+        /*synchronized (referencedDocumentVersionsMonitor) {
             def versions = referencedDocumentVersions?.get()
             if(versions == null) {
                 versions = doGetReferencedDocumentsVersion()
                 referencedDocumentVersions = new SoftReference<>(versions)
             }
             return versions
-        }
+        }*/
     }
 
     private Map doGetReferencedDocumentsVersion() {
