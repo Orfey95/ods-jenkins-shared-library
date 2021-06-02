@@ -17,6 +17,8 @@ import org.ods.util.Logger
 
 import groovy.xml.XmlUtil
 
+import java.util.concurrent.locks.ReentrantLock
+
 @SuppressWarnings(['IfStatementBraces',
     'LineLength',
     'AbcMetric',
@@ -1698,8 +1700,8 @@ class LeVADocumentUseCase extends DocGenUseCase {
         return versionId
     }
 
-    private SoftReference<Map> referencedDocumentVersions = null
-    private final Object referencedDocumentVersionsMonitor = new Object()
+    private Map referencedDocumentVersions = null
+    private final ReentrantLock referencedDocumentVersionsMonitor = new ReentrantLock()
 
     /**
      * gets teh document version IDS at the start ... can't do that...
