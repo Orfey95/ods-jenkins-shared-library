@@ -1,6 +1,7 @@
 package org.ods.orchestration.usecase
 
 import com.cloudbees.groovy.cps.NonCPS
+import org.ods.services.ServiceRegistry
 
 import java.time.LocalDateTime
 import org.ods.services.GitService
@@ -1600,6 +1601,8 @@ class LeVADocumentUseCase extends DocGenUseCase {
             def docChapterKeys = docChapters.collect { chapter ->
                 chapter.key
             }
+            def logger = ServiceRegistry.instance.get(Logger)
+            logger.info("latestValidVersionId: ${latestValidVersionId}, class: ${latestValidVersionId.class.getSimpleName()}")
             docHistory.load(jiraData, latestValidVersionId, (keysInDoc + docChapterKeys).unique())
 
             // Save the doc history to project class, so it can be persisted when considered
