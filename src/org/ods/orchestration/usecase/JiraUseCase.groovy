@@ -1,5 +1,6 @@
 package org.ods.orchestration.usecase
 
+import com.cloudbees.groovy.cps.NonCPS
 import org.ods.orchestration.parser.JUnitParser
 import org.ods.orchestration.service.JiraService
 import org.ods.util.IPipelineSteps
@@ -7,6 +8,8 @@ import org.ods.util.ILogger
 import org.ods.orchestration.util.MROPipelineUtil
 import org.ods.orchestration.util.Project
 import org.ods.orchestration.util.Project.JiraDataItem
+
+import java.util.concurrent.ConcurrentHashMap
 
 @SuppressWarnings(['IfStatementBraces', 'LineLength'])
 class JiraUseCase {
@@ -360,25 +363,31 @@ class JiraUseCase {
 
     }
 
+    // This is a cache for the method getLatestDocVersionId. Do not use outside of that method.
+    private final docVersions = new ConcurrentHashMap<String, Long>()
+
+    @NonCPS
     Long getLatestDocVersionId(List<Map> trackingIssues) {
         def documentationTrackingIssueFields = this.project.getJiraFieldsForIssueType(IssueTypes.DOCUMENTATION_TRACKING)
         def documentVersionField = documentationTrackingIssueFields[CustomIssueFields.DOCUMENT_VERSION].id as String
 
         // We will use the biggest ID available
         def versionList = trackingIssues.collect { issue ->
-            def versionNumber = 0L
+             return docVersions.computeIfAbsent(issue.key as String, { key ->
+                 def versionNumber = 0L
 
-            def version = this.jira.getTextFieldsOfIssue(issue.key as String, [documentVersionField])?.getAt(documentVersionField)
-            if (version) {
-                try {
-                    versionNumber = version.toLong()
-                } catch (NumberFormatException _) {
-                    this.logger.warn("Document tracking issue '${issue.key}' does not contain a valid numerical" +
-                        "version. It contains value '${version}'.")
-                }
-            }
+                 def version = this.jira.getTextFieldsOfIssue(key as String, [documentVersionField])?.getAt(documentVersionField)
+                 if (version) {
+                     try {
+                         versionNumber = version.toLong()
+                     } catch (NumberFormatException _) {
+                         this.logger.warn("Document tracking issue '${key}' does not contain a valid numerical" +
+                             "version. It contains value '${version}'.")
+                     }
+                 }
 
-            return versionNumber
+                 return versionNumber
+             })
         }
 
         def result = versionList.max()

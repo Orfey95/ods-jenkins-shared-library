@@ -1623,14 +1623,8 @@ class LeVADocumentUseCase extends DocGenUseCase {
         def documentationTrackingIssueFields = this.project.getJiraFieldsForIssueType(JiraUseCase.IssueTypes.DOCUMENTATION_TRACKING)
         def documentationTrackingIssueDocumentVersionField = documentationTrackingIssueFields[JiraUseCase.CustomIssueFields.DOCUMENT_VERSION]
 
-        if (this.project.isVersioningEnabled) {
-            if (!this.project.isDeveloperPreviewMode() && !this.project.hasWipJiraIssues()) {
-                // In case of generating a final document, we add the label for the version that should be released
-                this.jiraUseCase.jira.updateTextFieldsOnIssue(jiraIssueKey,
-                    [(documentationTrackingIssueDocumentVersionField.id): "${docVersionId}"])
-            }
-        } else {
-            // TODO removeme for ODS 4.0
+        if (!this.project.isDeveloperPreviewMode() && !this.project.hasWipJiraIssues()) {
+            // In case of generating a final document, we add the label for the version that should be released
             this.jiraUseCase.jira.updateTextFieldsOnIssue(jiraIssueKey,
                 [(documentationTrackingIssueDocumentVersionField.id): "${docVersionId}"])
         }
@@ -1730,10 +1724,7 @@ class LeVADocumentUseCase extends DocGenUseCase {
             def doc = dt as String
             def version
 
-            if (! this.project.isVersioningEnabled) {
-                // TODO removeme in ODS 4.x
-                version = "${this.project.buildParams.version}-${this.steps.env.BUILD_NUMBER}"
-            } else if (this.project.historyForDocumentExists(doc)) {
+            if (this.project.historyForDocumentExists(doc)) {
                 version = this.project.getHistoryForDocument(doc).getVersion()
             } else {
                 def trackingIssues =  this.getDocumentTrackingIssues(doc, ['D', 'Q', 'P'])

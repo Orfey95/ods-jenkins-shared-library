@@ -1564,48 +1564,6 @@ class ProjectSpec extends SpecHelper {
         metadataFile.delete()
     }
 
-    def "use old docGen report when version is not enabled for the feature"() {
-        setup:
-        def versionEnabled
-        def jiraServiceStubs = { JiraService it ->
-            it.isVersionEnabledForDelta(*_) >> {
-                return versionEnabled
-            }
-            it.getDocGenData(*_) >> { return [project:[id:"1"]] }
-            it.getDeltaDocGenData(*_) >> { return [project:[id:"1"]] }
-            it.getTextFieldsOfIssue(*_) >> { return [field_0: [name: "1"]]}
-        }
-        project = setupWithJiraService(jiraServiceStubs)
-        project.data.jira = [issueTypes: [
-            (JiraUseCase.IssueTypes.RELEASE_STATUS): [ fields: [
-                (JiraUseCase.CustomIssueFields.RELEASE_VERSION): [id: "field_0"],
-            ]]
-        ]]
-
-        when:
-        versionEnabled = false
-        project.loadJiraData("projectKey")
-
-        then:
-        1 * project.getDocumentChapterData(_) >> [:]
-        1 * project.getVersionFromReleaseStatusIssue()
-        0 * project.loadJiraDataForCurrentVersion(*_)
-        1 * project.loadFullJiraData(_)
-
-        when:
-        versionEnabled = true
-        project.loadJiraData("DEMO")
-
-        then:
-        1 * project.getVersionFromReleaseStatusIssue() >> '1'
-
-        then:
-        1 * project.loadJiraDataForCurrentVersion(*_)
-        1 * project.getDocumentChapterData(*_) >> [:]
-        0 * project.loadFullJiraData(_)
-
-    }
-
     def "load saved data from the previousVersion"() {
         setup:
         def firstVersion = '1'
