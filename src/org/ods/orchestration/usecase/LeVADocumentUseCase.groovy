@@ -3,6 +3,7 @@ package org.ods.orchestration.usecase
 import com.cloudbees.groovy.cps.NonCPS
 import org.ods.services.ServiceRegistry
 
+import java.lang.ref.SoftReference
 import java.time.LocalDateTime
 import org.ods.services.GitService
 import org.ods.services.JenkinsService
@@ -1697,14 +1698,22 @@ class LeVADocumentUseCase extends DocGenUseCase {
         return versionId
     }
 
-    private Map referencedDocumentVersions = null
+    private SoftReference<Map> referencedDocumentVersions = null
+    private final Object referencedDocumentVersionsMonitor = new Object()
 
     /**
      * gets teh document version IDS at the start ... can't do that...
      * @return
      */
-    protected synchronized Map getReferencedDocumentsVersion() {
-        return referencedDocumentVersions?:doGetReferencedDocumentsVersion()
+    protected Map getReferencedDocumentsVersion() {
+        synchronized (referencedDocumentVersionsMonitor) {
+            def versions = referencedDocumentVersions?.get()
+            if(versions == null) {
+                versions = doGetReferencedDocumentsVersion()
+                referencedDocumentVersions = new SoftReference<>(versions)
+            }
+            return versions
+        }
     }
 
     private Map doGetReferencedDocumentsVersion() {
