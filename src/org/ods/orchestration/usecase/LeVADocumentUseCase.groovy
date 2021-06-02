@@ -1700,7 +1700,7 @@ class LeVADocumentUseCase extends DocGenUseCase {
         return versionId
     }
 
-    private Map referencedDocumentVersions = null
+    private static volatile Map referencedDocumentVersions = null
 
     /**
      * gets teh document version IDS at the start ... can't do that...
