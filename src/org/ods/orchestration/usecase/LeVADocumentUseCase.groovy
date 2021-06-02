@@ -1709,6 +1709,7 @@ class LeVADocumentUseCase extends DocGenUseCase {
     protected Map getReferencedDocumentsVersion() {
         def versions = referencedDocumentVersions
         if(versions == null) {
+            ServiceRegistry.instance.get(Logger).info("Blirp")
             versions = doGetReferencedDocumentsVersion()
             referencedDocumentVersions = versions
         }
