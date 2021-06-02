@@ -372,7 +372,7 @@ class JiraUseCase {
         // We will use the biggest ID available
         def versionList = trackingIssues.collect { issue ->
              return docVersions.computeIfAbsent(issue.key as String, { key ->
-                 logger.info("Compute")
+                 logger.info("Blerp")
                  def versionNumber = 0L
 
                  def version = this.jira.getTextFieldsOfIssue(key as String, [documentVersionField])?.getAt(documentVersionField)
