@@ -1710,6 +1710,7 @@ class LeVADocumentUseCase extends DocGenUseCase {
             def version = docVersions[issue.key]
             if (version == null) {
                 version = this.jiraUseCase.getDocVersionId(issue)
+                docVersions[issue.key] = version
             }
             return version
         }
