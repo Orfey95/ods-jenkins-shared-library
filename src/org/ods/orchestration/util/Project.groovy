@@ -332,6 +332,7 @@ class Project {
     }
 
     Project load(GitService git, JiraUseCase jiraUseCase) {
+        logger.info('BlerLoad')
         this.git = git
         this.jiraUseCase = jiraUseCase
 

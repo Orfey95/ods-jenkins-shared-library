@@ -1717,7 +1717,7 @@ class LeVADocumentUseCase extends DocGenUseCase {
         return versionList.max()
     }
 
-    private static volatile Map referencedDocumentVersions = null
+    private volatile Map referencedDocumentVersions = null
 
     /**
      * gets teh document version IDS at the start ... can't do that...
