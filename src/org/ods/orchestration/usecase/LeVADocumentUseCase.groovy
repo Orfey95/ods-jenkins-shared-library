@@ -1684,9 +1684,6 @@ class LeVADocumentUseCase extends DocGenUseCase {
         return sections
     }
 
-    // This is a cache for the method getLatestDocVersionId. Do not use outside of that method.
-    private final docVersions = new ConcurrentHashMap<String, Long>()
-
     /**
      * Gets the valid or to be valid document version either from the current project (for documents created
      * together) or from Jira for documents generated in another environments.
@@ -1699,15 +1696,22 @@ class LeVADocumentUseCase extends DocGenUseCase {
             versionId = this.project.getHistoryForDocument(document).getVersion()
         } else {
             def trackingIssues =  this.getDocumentTrackingIssuesForHistory(document, environments)
-            def versionList = trackingIssues.collect { issue ->
-                docVersions.computeIfAbsent(issue.key as String, { String key ->
-                    this.jiraUseCase.getDocVersionId(issue)
-                })
-            }
-
-            versionId = versionList.max()
+            versionId = getLatestDocVersion(trackingIssues)
         }
         return versionId
+    }
+
+    // This is a cache for the method getLatestDocVersionId. Do not use outside of that method.
+    private final docVersions = new ConcurrentHashMap<String, Long>()
+
+    private Long getLatestDocVersion(List<Map> trackingIssues) {
+        def versionList = trackingIssues.collect { issue ->
+            docVersions.computeIfAbsent(issue.key as String, { String key ->
+                this.jiraUseCase.getDocVersionId(issue)
+            })
+        }
+
+        return versionList.max()
     }
 
     private static volatile Map referencedDocumentVersions = null
@@ -1755,7 +1759,7 @@ class LeVADocumentUseCase extends DocGenUseCase {
                 version = this.project.getHistoryForDocument(doc).getVersion()
             } else {
                 def trackingIssues =  this.getDocumentTrackingIssues(doc, ['D', 'Q', 'P'])
-                version = this.jiraUseCase.getLatestDocVersionId(trackingIssues)
+                version = this.getLatestDocVersion(trackingIssues)
                 if (this.project.isWorkInProgress) {
                     version = (version + 1L).toString() + "-WIP"
                 } else if (docIsCreatedInTheEnvironment(doc)) {
