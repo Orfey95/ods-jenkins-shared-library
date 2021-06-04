@@ -17,6 +17,7 @@ import org.ods.util.Logger
 
 import groovy.xml.XmlUtil
 
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
 
 @SuppressWarnings(['IfStatementBraces',
@@ -1683,6 +1684,9 @@ class LeVADocumentUseCase extends DocGenUseCase {
         return sections
     }
 
+    // This is a cache for the method getLatestDocVersionId. Do not use outside of that method.
+    private final docVersions = new ConcurrentHashMap<String, Long>()
+
     /**
      * Gets the valid or to be valid document version either from the current project (for documents created
      * together) or from Jira for documents generated in another environments.
@@ -1695,7 +1699,13 @@ class LeVADocumentUseCase extends DocGenUseCase {
             versionId = this.project.getHistoryForDocument(document).getVersion()
         } else {
             def trackingIssues =  this.getDocumentTrackingIssuesForHistory(document, environments)
-            versionId = this.jiraUseCase.getLatestDocVersionId(trackingIssues)
+            def versionList = trackingIssues.collect { issue ->
+                docVersions.computeIfAbsent(issue.key as String, { String key ->
+                    this.jiraUseCase.getDocVersionId(issue)
+                })
+            }
+
+            versionId = versionList.max()
         }
         return versionId
     }
@@ -1709,7 +1719,6 @@ class LeVADocumentUseCase extends DocGenUseCase {
     protected Map getReferencedDocumentsVersion() {
         def versions = referencedDocumentVersions
         if(versions == null) {
-            ServiceRegistry.instance.get(Logger).info("Blirp")
             versions = doGetReferencedDocumentsVersion()
             referencedDocumentVersions = versions
         }
