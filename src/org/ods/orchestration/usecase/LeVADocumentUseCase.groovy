@@ -1702,14 +1702,16 @@ class LeVADocumentUseCase extends DocGenUseCase {
     }
 
     // This is a cache for the method getLatestDocVersionId. Do not use outside of that method.
-    private final docVersions = new ConcurrentHashMap<String, Long>()
+    private final docVersions = [:] as Map<String, Long>
 
     private Long getLatestDocVersion(List<Map> trackingIssues) {
         def versionList = trackingIssues.collect { issue ->
-            docVersions.computeIfAbsent(issue.key as String, { String key ->
-                ServiceRegistry.instance.get(Logger).info("Blirp: {key}")
-                this.jiraUseCase.getDocVersionId(issue)
-            })
+            ServiceRegistry.instance.get(Logger).info("Blirp: ${key}")
+            def version = docVersions[issue.key]
+            if (version == null) {
+                version = this.jiraUseCase.getDocVersionId(issue)
+            }
+            return version
         }
 
         return versionList.max()
