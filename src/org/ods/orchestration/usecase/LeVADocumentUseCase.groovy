@@ -1729,7 +1729,7 @@ class LeVADocumentUseCase extends DocGenUseCase {
         if(versions == null) {
             ServiceRegistry.instance.get(Logger).info("Blurp")
             versions = doGetReferencedDocumentsVersion()
-            //referencedDocumentVersions = versions
+            referencedDocumentVersions = versions
         }
         return versions
     }
