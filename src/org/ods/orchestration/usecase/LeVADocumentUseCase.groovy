@@ -1702,7 +1702,7 @@ class LeVADocumentUseCase extends DocGenUseCase {
     }
 
     // This is a cache for the method getLatestDocVersionId. Do not use outside of that method.
-    private final docVersions = [:] as Map<String, Long>
+    private volatile docVersions = [:] as Map<String, Long>
 
     private Long getLatestDocVersion(List<Map> trackingIssues) {
         def versionList = trackingIssues.collect { issue ->
