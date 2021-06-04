@@ -376,7 +376,7 @@ class JiraUseCase {
     }
 
     Long getDocVersionId(Map trackingIssue) {
-        logger.info("Blerp: ${issue.key}")
+        logger.info("Blerp: ${trackingIssue.key}")
         def documentationTrackingIssueFields = this.project.getJiraFieldsForIssueType(IssueTypes.DOCUMENTATION_TRACKING)
         def documentVersionField = documentationTrackingIssueFields[CustomIssueFields.DOCUMENT_VERSION].id as String
         def versionNumber = 0L
