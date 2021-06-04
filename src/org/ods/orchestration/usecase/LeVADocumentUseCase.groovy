@@ -1706,7 +1706,7 @@ class LeVADocumentUseCase extends DocGenUseCase {
 
     private Long getLatestDocVersion(List<Map> trackingIssues) {
         def versionList = trackingIssues.collect { issue ->
-            ServiceRegistry.instance.get(Logger).info("Blirp: ${key}")
+            ServiceRegistry.instance.get(Logger).info("Blirp: ${issue.key}")
             def version = docVersions[issue.key]
             if (version == null) {
                 version = this.jiraUseCase.getDocVersionId(issue)
