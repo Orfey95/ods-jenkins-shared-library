@@ -1696,41 +1696,22 @@ class LeVADocumentUseCase extends DocGenUseCase {
             versionId = this.project.getHistoryForDocument(document).getVersion()
         } else {
             def trackingIssues =  this.getDocumentTrackingIssuesForHistory(document, environments)
-            versionId = getLatestDocVersion(trackingIssues)
+            versionId = this.jiraUseCase.getLatestDocVersionId(trackingIssues)
         }
         return versionId
     }
 
-    // This is a cache for the method getLatestDocVersionId. Do not use outside of that method.
-    private volatile docVersions = Collections.<String, Long>synchronizedMap([:])
-
-    private Long getLatestDocVersion(List<Map> trackingIssues) {
-        def versionList = trackingIssues.collect { issue ->
-            ServiceRegistry.instance.get(Logger).info("Blirp: ${issue.key}")
-            def version = docVersions[issue.key]
-            if (version == null) {
-                version = this.jiraUseCase.getDocVersionId(issue)
-                docVersions[issue.key] = version
-            }
-            return version
-        }
-
-        return versionList.max()
-    }
-
-    private volatile Map referencedDocumentVersions = null
+    private static volatile Map referencedDocumentVersions = null
 
     /**
      * gets teh document version IDS at the start ... can't do that...
      * @return
      */
     protected Map getReferencedDocumentsVersion() {
-        ServiceRegistry.instance.get(Logger).info("Blorp")
         def versions = referencedDocumentVersions
         if(versions == null) {
-            ServiceRegistry.instance.get(Logger).info("Blurp")
             versions = doGetReferencedDocumentsVersion()
-            referencedDocumentVersions = versions
+            //referencedDocumentVersions = versions
         }
         return versions
     }
@@ -1765,7 +1746,7 @@ class LeVADocumentUseCase extends DocGenUseCase {
                 version = this.project.getHistoryForDocument(doc).getVersion()
             } else {
                 def trackingIssues =  this.getDocumentTrackingIssues(doc, ['D', 'Q', 'P'])
-                version = this.getLatestDocVersion(trackingIssues)
+                version = this.jiraUseCase.getLatestDocVersionId(trackingIssues)
                 if (this.project.isWorkInProgress) {
                     version = (version + 1L).toString() + "-WIP"
                 } else if (docIsCreatedInTheEnvironment(doc)) {

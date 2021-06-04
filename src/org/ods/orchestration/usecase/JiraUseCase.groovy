@@ -362,10 +362,32 @@ class JiraUseCase {
 
     }
 
+    // This is a cache for the method getLatestDocVersionId. Do not use outside of that method.
+    private final docVersions = new HashMap<String, Long>(64)
+
     Long getLatestDocVersionId(List<Map> trackingIssues) {
+        def documentationTrackingIssueFields = this.project.getJiraFieldsForIssueType(IssueTypes.DOCUMENTATION_TRACKING)
+        def documentVersionField = documentationTrackingIssueFields[CustomIssueFields.DOCUMENT_VERSION].id as String
+
         // We will use the biggest ID available
         def versionList = trackingIssues.collect { issue ->
-            getDocVersionId(issue)
+            logger.info("Blerp: ${issue.key}")
+            def versionNumber = docVersions[issue.key]
+            if (versionNumber == null) {
+                logger.info("Blirp: ${issue.key}")
+                versionNumber = 0L
+                def version = this.jira.getTextFieldsOfIssue(issue.key as String, [documentVersionField])?.getAt(documentVersionField)
+                if (version) {
+                    try {
+                        versionNumber = version.toLong()
+                    } catch (NumberFormatException _) {
+                        this.logger.warn("Document tracking issue '${issue.key}' does not contain a valid numerical" +
+                            "version. It contains value '${version}'.")
+                    }
+                }
+                docVersions[issue.key] = versionNumber
+            }
+            return versionNumber
         }
 
         def result = versionList.max()
@@ -373,24 +395,6 @@ class JiraUseCase {
             "${trackingIssues.collect { it.key } }")
 
         return result
-    }
-
-    Long getDocVersionId(Map trackingIssue) {
-        logger.info("Blerp: ${trackingIssue.key}")
-        def documentationTrackingIssueFields = this.project.getJiraFieldsForIssueType(IssueTypes.DOCUMENTATION_TRACKING)
-        def documentVersionField = documentationTrackingIssueFields[CustomIssueFields.DOCUMENT_VERSION].id as String
-        def versionNumber = 0L
-
-        def version = this.jira.getTextFieldsOfIssue(trackingIssue.key as String, [documentVersionField])?.getAt(documentVersionField)
-        if (version) {
-            try {
-                versionNumber = version.toLong()
-            } catch (NumberFormatException _) {
-                this.logger.warn("Document tracking issue '${trackingIssue.key}' does not contain a valid numerical" +
-                    "version. It contains value '${version}'.")
-            }
-        }
-        return versionNumber
     }
 
     private void walkTestIssuesAndTestResults(List testIssues, Map testResults, Closure visitor) {
