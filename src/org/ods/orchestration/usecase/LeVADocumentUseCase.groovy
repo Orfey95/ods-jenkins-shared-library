@@ -1701,22 +1701,11 @@ class LeVADocumentUseCase extends DocGenUseCase {
         return versionId
     }
 
-    private static volatile Map referencedDocumentVersions = null
-
     /**
      * gets teh document version IDS at the start ... can't do that...
      * @return
      */
     protected Map getReferencedDocumentsVersion() {
-        def versions = referencedDocumentVersions
-        if(versions == null) {
-            versions = doGetReferencedDocumentsVersion()
-            //referencedDocumentVersions = versions
-        }
-        return versions
-    }
-
-    private Map doGetReferencedDocumentsVersion() {
         if (!this.jiraUseCase) return [:]
         if (!this.jiraUseCase.jira) return [:]
 

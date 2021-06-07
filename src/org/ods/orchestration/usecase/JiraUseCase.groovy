@@ -371,10 +371,8 @@ class JiraUseCase {
 
         // We will use the biggest ID available
         def versionList = trackingIssues.collect { issue ->
-            logger.info("Blerp: ${issue.key}")
             def versionNumber = docVersions[issue.key]
             if (versionNumber == null) {
-                logger.info("Blirp: ${issue.key}")
                 versionNumber = 0L
                 def version = this.jira.getTextFieldsOfIssue(issue.key as String, [documentVersionField])?.getAt(documentVersionField)
                 if (version) {
